@@ -58,7 +58,7 @@ export default {
   .aside{
     .logo {
       height: 32px;
-      margin: 16px;
+      margin: 9px 16px;
       line-height: 32px;
       border-radius: 4px;
       text-align: center;
@@ -80,19 +80,23 @@ export default {
     display: flex;
     flex-direction: column;
     .header{
+      height: 50px;
       display: flex;
       justify-content: space-between;
       padding-left: 0;
       border-left: 1px solid #f0f2f5;
       background-color: #fff;
-      .trigger {
-        font-size: 18px;
-        line-height: 64px;
-        padding: 0 24px;
-        cursor: pointer;
-        transition: color 0.3s;
-        &:hover{
-          color: #1890ff;
+      .left{
+        font-size: 0;
+        .trigger {
+          font-size: 18px;
+          line-height: 50px;
+          padding: 0 16px;
+          cursor: pointer;
+          transition: color 0.3s;
+          &:hover{
+            color: #1890ff;
+          }
         }
       }
     }

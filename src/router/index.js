@@ -2,14 +2,27 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Layout from '@/layout/'
 
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}
+
 Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/',
+    path: '',
     name: '首页',
     icon: 'home',
-    component: Layout
+    component: Layout,
+    redirect: '/home',
+    children: [
+      {
+        path: '/home',
+        name: 'home',
+        component: () => import('@/views/home/index')
+      }
+    ]
   },
   {
     path: '/customer',
@@ -34,6 +47,11 @@ const routes = [
         path: '/label',
         name: '标签管理',
         component: () => import('@/views/planing/label')
+      },
+      {
+        path: '/cards',
+        name: '活动套装',
+        component: () => import('@/views/planing/cards')
       }
     ]
   }

@@ -2,11 +2,8 @@
   <div class="container">
     <div class="search">
       <a-form layout="inline" @submit="handleSearch">
-        <a-form-item label="名称">
-          <a-input v-model="form.name" placeholder="查询姓名" />
-        </a-form-item>
-        <a-form-item label="售价">
-          <a-input v-model="form.phone" placeholder="查询电话" />
+        <a-form-item label="活动名称">
+          <a-input v-model="form.name" placeholder="查询活动名称" />
         </a-form-item>
         <a-form-item>
           <a-button type="default" icon="redo" class="mr-16" html-type="reset">重置</a-button>
@@ -18,7 +15,10 @@
       <div class="table-operation">
         <a-button type="primary" @click="handleShowDialog()">新增活动</a-button>
       </div>
-      <a-table bordered :columns="columns" :data-source="data" row-key="_id">
+      <a-table bordered :columns="columns" :data-source="data" :loading="tableLoading" row-key="_id">
+        <span slot="isDate" slot-scope="item">
+          {{ item.isDate === 'infinite' ? '不限时间' : item.date }}
+        </span>
         <span slot="operation" slot-scope="item" class="operation-btns">
           <a @click="handleShowDialog(item)">编辑</a>
           <a-divider type="vertical" />
@@ -27,7 +27,7 @@
       </a-table>
     </div>
     <a-modal
-      :title="title"
+      :title="isEdit ? '编辑活动' : '新增活动'"
       :visible="visible"
       :confirm-loading="confirmLoading"
       @ok="handleConfirm"
@@ -68,9 +68,7 @@ export default {
     return {
       // 搜索
       form: {
-        name: '',
-        phone: '',
-        cardId: ''
+        name: ''
       },
       // 表格
       columns: [
@@ -96,7 +94,7 @@ export default {
         },
         {
           title: '活动有效期',
-          dataIndex: 'term'
+          scopedSlots: { customRender: 'isDate' }
         },
         {
           title: '操作',
@@ -104,9 +102,10 @@ export default {
         }
       ],
       data: [],
+      tableLoading: false,
       // 弹窗
       visible: false,
-      title: '新增活动',
+      isEdit: 1,
       confirmLoading: false,
       modelForm: {
         name: '',
@@ -143,18 +142,26 @@ export default {
     this.getTableList()
   },
   methods: {
+    // 搜索
+    handleSearch() {
+      this.getTableList()
+    },
     async getTableList() {
-      const result = await this.$http.get('/planing/list')
+      this.tableLoading = true
+      const result = await this.$http.get(`/planing/list?${this.$qs.stringify(this.form)}`)
+      this.tableLoading = false
       const { data } = result.data
       this.data = data
     },
     // 显示弹窗
     handleShowDialog(item) {
-      // 新增
       if (item) {
-        this.title = '编辑活动'
-      } else { // 编辑
-        this.title = '新增活动'
+        this.isEdit = 1
+        this.$nextTick(() => {
+          this.modelForm = Object.assign({}, this.modelForm, item)
+        })
+      } else {
+        this.isEdit = 0
       }
       this.visible = true
     },
@@ -162,27 +169,37 @@ export default {
     handleConfirm() {
       this.$refs.modelForm.validate(async valid => {
         if (!valid) return
-        const result = await this.$http.post('/planing/insert', this.modelForm)
+        const result = await this.$http.post(`/planing/${this.isEdit ? 'update' : 'insert'}`, this.modelForm)
         if (!result) return
         this.visible = false
         this.getTableList()
       })
     },
     // 删除
-    async handleDeletes(item) {
-      console.log(item)
-      const result = await this.$http.post('/planing/delete', { _id: item._id })
-      if (!result) return
-      this.visible = false
-      this.getTableList()
+    handleDeletes(item) {
+      this.$confirm({
+        title: '警告',
+        content: h => <div>你确定要删除<span style='color:red; font-weight: bold'> { item.name } </span>吗?</div>,
+        okText: '确认',
+        okType: 'danger',
+        cancelText: '取消',
+        async onOk() {
+          const result = await this.$http.post('/planing/delete', { _id: item._id })
+          if (!result) return
+          this.visible = false
+          this.getTableList()
+        },
+        onCancel() {
+          console.log('Cancel')
+        }
+      })
     },
+    // 取消/关闭弹窗
     handleCancel() {
       this.visible = false
+      this.$refs.modelForm.resetFields()
     },
-    handleRangeDate() {},
-    handleSearch() {
-      console.log(this.form)
-    }
+    handleRangeDate() {}
   }
 }
 </script>

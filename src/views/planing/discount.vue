@@ -13,11 +13,14 @@
     </div>
     <div class="my-table">
       <div class="table-operation">
-        <a-button type="primary" @click="handleShowDialog()">新增标签</a-button>
+        <a-button type="primary" @click="handleShowDialog()">配置折扣</a-button>
       </div>
       <a-table bordered :columns="columns" :data-source="data" :loading="tableLoading" row-key="_id">
-        <span slot="isDate" slot-scope="item">
-          {{ item.isDate === 'infinite' ? '不限时间' : item.date }}
+        <span slot="discount" slot-scope="{ discount }">
+          {{ discount }} 折
+        </span>
+        <span slot="price" slot-scope="{ price }">
+          <span style="color:#52c41a">￥{{ price }}</span> 元
         </span>
         <span slot="isEnable" slot-scope="{ isEnable }">
           <a-tag :color="isEnable ? 'green' : 'red'">{{ isEnable ? '已启用' : '已禁用' }}</a-tag>
@@ -33,18 +36,18 @@
       </a-table>
     </div>
     <a-modal
-      :title="isEdit ? '编辑标签' : '新增标签'"
+      :title="isEdit ? '编辑折扣' : '配置折扣'"
       :visible="visible"
       :confirm-loading="confirmLoading"
       @ok="handleConfirm"
       @cancel="handleCancel"
     >
       <a-form-model ref="modelForm" layout="horizontal" hide-required-mark :model="modelForm" :rules="rulesForm" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-model-item label="标签名称" prop="name">
-          <a-input v-model="modelForm.name" placeholder="填写标签名称" />
+        <a-form-model-item label="折扣" prop="discount">
+          <a-input v-model="modelForm.discount" placeholder="填写折扣" />
         </a-form-model-item>
-        <a-form-model-item label="标签描述" prop="desc">
-          <a-input v-model="modelForm.desc" type="textarea" placeholder="填写标签描述" />
+        <a-form-model-item label="金额" prop="price">
+          <a-input v-model="modelForm.price" prefix="￥" suffix="RMB" placeholder="填写金额" />
         </a-form-model-item>
         <a-form-model-item label="状态" prop="isEnable">
           <a-radio-group v-model="modelForm.isEnable">
@@ -67,12 +70,12 @@ export default {
       // 表格
       columns: [
         {
-          title: '标签名称',
-          dataIndex: 'name'
+          title: '折扣',
+          scopedSlots: { customRender: 'discount' }
         },
         {
-          title: '标签描述',
-          dataIndex: 'desc'
+          title: '金额',
+          scopedSlots: { customRender: 'price' }
         },
         {
           title: '状态',
@@ -95,16 +98,16 @@ export default {
       isEdit: 1,
       confirmLoading: false,
       modelForm: {
-        name: '',
-        desc: '',
+        discount: '',
+        price: '',
         isEnable: 1
       },
       rulesForm: {
-        name: [
-          { required: true, message: '请填写标签名称' }
+        discount: [
+          { required: true, message: '请填折扣' }
         ],
-        desc: [
-          { required: true, message: '请填写标签描述' }
+        price: [
+          { required: true, message: '请填写充值金额' }
         ]
       }
     }
@@ -123,7 +126,7 @@ export default {
     },
     async getTableList() {
       this.tableLoading = true
-      const result = await this.$http.get(`/label/list?${this.$qs.stringify(this.searchForm)}`)
+      const result = await this.$http.get(`/discount/list?${this.$qs.stringify(this.searchForm)}`)
       this.tableLoading = false
       const { data } = result.data
       this.data = data
@@ -144,7 +147,7 @@ export default {
     handleConfirm() {
       this.$refs.modelForm.validate(async valid => {
         if (!valid) return
-        const result = await this.$http.post(`/label/${this.isEdit ? 'update' : 'insert'}`, this.modelForm)
+        const result = await this.$http.post(`/discount/${this.isEdit ? 'update' : 'insert'}`, this.modelForm)
         if (!result) return
         this.visible = false
         this.getTableList()
@@ -160,7 +163,7 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         async onOk() {
-          const result = await _this.$http.post('/label/delete', { _id: item._id })
+          const result = await _this.$http.post('/discount/delete', { _id: item._id })
           if (!result) return
           _this.visible = false
           _this.getTableList()
@@ -197,4 +200,3 @@ export default {
   }
 }
 </style>
-

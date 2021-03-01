@@ -5,10 +5,11 @@ import store from './store'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
 import '@/styles/index.css'
-
+import dateformat from 'dateformat'
 import qs from 'qs'
 import request from '@/utils/request'
 
+Vue.prototype.$dateformat = dateformat
 Vue.prototype.$http = request
 Vue.prototype.$qs = qs
 Vue.use(Antd)

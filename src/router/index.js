@@ -52,6 +52,11 @@ const routes = [
         path: '/cards',
         name: '活动套装',
         component: () => import('@/views/planing/cards')
+      },
+      {
+        path: '/discount',
+        name: '折扣管理',
+        component: () => import('@/views/planing/discount')
       }
     ]
   }

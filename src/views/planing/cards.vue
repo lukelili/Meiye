@@ -22,6 +22,9 @@
         <span slot="isEnable" slot-scope="{ isEnable }">
           <a-tag :color="isEnable ? 'green' : 'red'">{{ isEnable ? '已启用' : '已禁用' }}</a-tag>
         </span>
+        <span slot="price" slot-scope="{ price }">
+          {{ price | decimal2 }}
+        </span>
         <span slot="create_time" slot-scope="{ create_time }">
           {{ $dateformat(create_time, 'isoDate') }}
         </span>
@@ -75,7 +78,9 @@
   </div>
 </template>
 <script>
+import filters from '@/mixins/filter'
 export default {
+  mixins: [filters],
   data() {
     return {
       // 搜索
@@ -90,7 +95,7 @@ export default {
         },
         {
           title: '活动售价',
-          dataIndex: 'price'
+          scopedSlots: { customRender: 'price' }
         },
         {
           title: '可用次数',

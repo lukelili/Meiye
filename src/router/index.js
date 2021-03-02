@@ -59,6 +59,19 @@ const routes = [
         component: () => import('@/views/planing/discount')
       }
     ]
+  },
+  {
+    path: '/systeam',
+    name: '系统设置',
+    component: Layout,
+    icon: 'setting',
+    children: [
+      {
+        path: '/staff',
+        name: '员工管理',
+        component: () => import('@/views/systeam/staff')
+      }
+    ]
   }
 ]
 

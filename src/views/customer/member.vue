@@ -22,14 +22,33 @@
         <a-button type="primary" @click="handleShowDialog()">录入会员</a-button>
       </div>
       <a-table bordered :columns="columns" :data-source="data" row-key="_id">
-        <span slot="gender" slot-scope="{ gender }" :style="{ color: gender === 'woman' ? '#eb2f96' : '#eb2f96' }">
-          <a-icon :type="gender ? 'woman' : 'man'" />
-          {{ gender === 'woman' ? '美女' : '帅哥' }}
+        <span slot="gender" slot-scope="{ gender }">
+          {{ gender === 'woman' ? '女' : '男' }}
+        </span>
+        <span slot="distcount" slot-scope="{ discount }">
+          {{ discount.discount }} 折
+        </span>
+        <span slot="labels" slot-scope="{ labels }">
+          <a-tag v-for="item in labels" :key="item.name" color="blue">
+            {{ item.name }}
+          </a-tag>
+        </span>
+        <span slot="payment" slot-scope="{ payment }">
+          {{ payment | decimal2 }}
+        </span>
+        <span slot="planing" slot-scope="{ planing }">
+          <span v-if="planing.length">
+            {{ planing }}
+          </span>
+          <span v-else>暂无</span>
+        </span>
+        <span slot="create_time" slot-scope="{ create_time }">
+          {{ $dateformat(create_time, 'isoDate') }}
         </span>
         <span slot="operation" slot-scope="item" class="operation-btns">
           <a>详情</a>
           <a-divider type="vertical" />
-          <a>划卡</a>
+          <a @click="handleShowSwiping(item)">划卡</a>
           <a-divider type="vertical" />
           <a>充值</a>
           <a-divider type="vertical" />
@@ -37,13 +56,35 @@
         </span>
       </a-table>
     </div>
-    <a-modal
-      :title="isEdit ? '编辑会员' : '录入会员'"
-      :visible="visible"
-      :confirm-loading="confirmLoading"
-      @ok="handleConfirm"
-      @cancel="handleCancel"
-    >
+    <!-- 销卡 -->
+    <a-modal title="销卡" :visible="cardVisible" :confirm-loading="cardLoading" @ok="handleCardConfirm" @cancel="handleCardCancel">
+      <a-form-model ref="modelForm" layout="horizontal" hide-required-mark :model="cardForm" :rules="cardRulesForm" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+        <a-form-model-item label="会员折扣" prop="price">
+          {{ cardForm.discount.discount }} 折
+        </a-form-model-item>
+        <a-form-model-item label="消费金额" prop="price">
+          <a-input v-model="cardForm.price" placeholder="填写消费金额" :suffix="`折后金额：${ cardForm.lastConsume }`" />
+        </a-form-model-item>
+        <a-form-model-item label="消费项目" prop="product">
+          <a-input v-model="cardForm.product" placeholder="填写消费项目" />
+        </a-form-model-item>
+        <a-form-model-item label="服务技师" prop="person">
+          <a-select v-model="cardForm.person" option-label-prop="label" placeholder="选择服务技师">
+            <a-select-option v-for="item in staffs" :key="item.name" :value="item._id" :label="item.name">
+              <div class="select-item">
+                <span class="discount">{{ item.name }}</span>
+                <span class="price">{{ item.level }}技师</span>
+              </div>
+            </a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item label="备注" prop="remarks">
+          <a-input v-model="cardForm.remarks" type="textarea" placeholder="填写备注信息" />
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
+    <!-- 录入会员/编辑会员 -->
+    <a-modal :title="isEdit ? '编辑会员' : '录入会员'" :visible="visible" :confirm-loading="confirmLoading" @ok="handleConfirm" @cancel="handleCancel">
       <a-form-model ref="modelForm" layout="horizontal" hide-required-mark :model="modelForm" :rules="rulesForm" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="卡号" prop="cardId">
           <a-input-search v-model="modelForm.cardId" placeholder="填写卡号" @search="handleAutoCardId">
@@ -109,7 +150,9 @@
   </div>
 </template>
 <script>
+import filters from '@/mixins/filter'
 export default {
+  mixins: [filters],
   data() {
     return {
       // 搜索
@@ -120,6 +163,10 @@ export default {
       },
       // 表格
       columns: [
+        {
+          title: '卡号',
+          dataIndex: 'cardId'
+        },
         {
           title: '姓名',
           dataIndex: 'name'
@@ -138,7 +185,7 @@ export default {
         },
         {
           title: '折扣',
-          dataIndex: 'distcount'
+          scopedSlots: { customRender: 'distcount' }
         },
         {
           title: '最后消费',
@@ -146,19 +193,23 @@ export default {
         },
         {
           title: '账户余额',
-          dataIndex: 'balance'
+          scopedSlots: { customRender: 'payment' }
         },
         {
           title: '套卡',
-          dataIndex: 'cards'
+          scopedSlots: { customRender: 'planing' }
         },
         {
           title: '标签',
-          dataIndex: 'labels'
+          scopedSlots: { customRender: 'labels' }
+        },
+        {
+          title: '备注',
+          dataIndex: 'remark'
         },
         {
           title: '入会时间',
-          dataIndex: 'create_time'
+          scopedSlots: { customRender: 'create_time' }
         },
         {
           title: '操作',
@@ -172,6 +223,7 @@ export default {
       confirmLoading: false,
       planings: [],
       discounts: [],
+      staffs: [],
       labels: [],
       modelForm: {
         cardId: '',
@@ -190,7 +242,25 @@ export default {
         name: { required: true, message: '请填写姓名' },
         phone: { required: true, message: '请填写手机号' },
         discount: { required: true, message: '请选择折扣' }
-      }
+      },
+      // 销卡弹窗
+      cardVisible: false,
+      cardLoading: false,
+      cardForm: {
+        discount: '',
+        price: '',
+        lastConsume: '',
+        payment: '',
+        product: '',
+        person: undefined,
+        remarks: ''
+      },
+      cardRulesForm: {}
+    }
+  },
+  watch: {
+    'cardForm.price'(num) {
+      this.cardForm.lastConsume = (num * this.cardForm.discount.discount).toFixed(2)
     }
   },
   mounted() {
@@ -200,6 +270,8 @@ export default {
     this.getLabels()
     // 活动套装列表
     this.getPanlings()
+    // 获取员工列表
+    this.getStaffs()
     // 获取会员列表
     this.getTableList()
   },
@@ -216,6 +288,11 @@ export default {
       const result = await this.$http.get('/planing/list')
       this.planings = result.data.data
     },
+    async getStaffs() {
+      const result = await this.$http.get('/staff/list')
+      this.staffs = result.data.data
+      console.log(result)
+    },
     async getTableList() {
       const result = await this.$http.get('/member/list')
       this.data = result.data.data
@@ -223,22 +300,27 @@ export default {
     handleSearch() {
       console.log(this.form)
     },
-    handleDiscountChange(value) {
-      const itemDis = this.discounts.filter(item => item._id === value)
-      this.modelForm.payment = itemDis[0].price
-      console.log(itemDis)
-    },
+    // ---------------------------------------- 会员编辑/录入会员 ----------------------------------------
     // 显示弹窗
     handleShowDialog(item) {
       if (item) {
         this.isEdit = 1
         this.$nextTick(() => {
           this.modelForm = Object.assign({}, this.modelForm, item)
+          this.modelForm.labels = item.labels.map(item => item._id)
+          this.modelForm.discount = item.discount._id
         })
       } else {
         this.isEdit = 0
       }
       this.visible = true
+    },
+    // 自动生成卡号
+    handleAutoCardId() {},
+    // 折扣选择
+    handleDiscountChange(value) {
+      const itemDis = this.discounts.filter(item => item._id === value)
+      this.modelForm.payment = itemDis[0].price
     },
     // 确认
     handleConfirm() {
@@ -254,9 +336,26 @@ export default {
     handleCancel() {
       this.visible = false
     },
-    // 自动生成卡号
-    handleAutoCardId() {
-
+    // ---------------------------------------- 销卡 ----------------------------------------
+    // 显示销卡弹窗
+    handleShowSwiping(item) {
+      this.cardVisible = true
+      this.cardForm = Object.assign({}, this.cardForm, item)
+    },
+    // 确认
+    handleCardConfirm() {
+      this.$refs.modelForm.validate(async valid => {
+        if (!valid) return
+        const result = await this.$http.post(`/member/cards`, this.cardForm)
+        if (!result) return
+        this.cardVisible = false
+        this.getTableList()
+      })
+      console.log('card', this.cardForm)
+    },
+    // 取消
+    handleCardCancel() {
+      this.cardVisible = false
     }
   }
 }

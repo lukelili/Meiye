@@ -250,7 +250,6 @@ export default {
         discount: '',
         price: '',
         lastConsume: '',
-        payment: '',
         product: '',
         person: undefined,
         remarks: ''
@@ -260,7 +259,7 @@ export default {
   },
   watch: {
     'cardForm.price'(num) {
-      this.cardForm.lastConsume = (num * this.cardForm.discount.discount).toFixed(2)
+      this.cardForm.lastConsume = (num * this.cardForm.discount.discount / 10).toFixed(2)
     }
   },
   mounted() {
@@ -340,7 +339,9 @@ export default {
     // 显示销卡弹窗
     handleShowSwiping(item) {
       this.cardVisible = true
-      this.cardForm = Object.assign({}, this.cardForm, item)
+      this.cardForm._id = item._id
+      this.cardForm.person = item.person
+      this.cardForm.discount = item.discount
     },
     // 确认
     handleCardConfirm() {

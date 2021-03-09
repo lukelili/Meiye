@@ -64,14 +64,14 @@
             <a-radio value="limited">限制时间</a-radio>
           </a-radio-group>
         </a-form-model-item>
+        <a-form-model-item v-if="modelForm.isDate === 'limited'" label="时间范围" prop="date">
+          <a-range-picker v-model="modelForm.date" @change="handleRangeDate" />
+        </a-form-model-item>
         <a-form-model-item label="状态">
           <a-radio-group v-model="modelForm.isEnable" prop="isEnable">
             <a-radio :value="1">启用</a-radio>
             <a-radio :value="0">禁用</a-radio>
           </a-radio-group>
-        </a-form-model-item>
-        <a-form-model-item v-if="modelForm.isDate === 'limited'" label="时间范围" prop="date">
-          <a-range-picker v-model="modelForm.date" @change="handleRangeDate" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>

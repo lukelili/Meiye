@@ -32,8 +32,21 @@ const routes = [
     children: [
       {
         path: '/member',
-        name: '会员列表',
-        component: () => import('@/views/customer/member')
+        name: '会员详情列表',
+        redirect: '/member',
+        component: () => import('@/views/customer/index'),
+        children: [
+          {
+            path: '/member',
+            name: '会员列表',
+            component: () => import('@/views/customer/member')
+          },
+          {
+            path: '/details',
+            name: '会员详情',
+            component: () => import('@/views/customer/details')
+          }
+        ]
       }
     ]
   },

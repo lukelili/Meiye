@@ -46,7 +46,7 @@
           {{ $dateformat(create_time, 'isoDate') }}
         </span>
         <span slot="operation" slot-scope="item" class="operation-btns">
-          <a>详情</a>
+          <a @click="handleJumpDetails(item)">详情</a>
           <a-divider type="vertical" />
           <a @click="handleShowSwiping(item)">划卡</a>
           <a-divider type="vertical" />
@@ -63,7 +63,7 @@
           {{ cardForm.discount.discount }} 折
         </a-form-model-item>
         <a-form-model-item label="消费金额" prop="price">
-          <a-input v-model="cardForm.price" placeholder="填写消费金额" :suffix="`折后金额：${ cardForm.lastConsume }`" />
+          <a-input v-model="cardForm.price" placeholder="填写消费金额" :suffix="`折后金额：${ cardForm.lastConsume ? cardForm.lastConsume: '0.00' }`" />
         </a-form-model-item>
         <a-form-model-item label="消费项目" prop="product">
           <a-input v-model="cardForm.product" placeholder="填写消费项目" />
@@ -250,7 +250,6 @@ export default {
         discount: '',
         price: '',
         lastConsume: '',
-        payment: '',
         product: '',
         person: undefined,
         remarks: ''
@@ -291,7 +290,6 @@ export default {
     async getStaffs() {
       const result = await this.$http.get('/staff/list')
       this.staffs = result.data.data
-      console.log(result)
     },
     async getTableList() {
       const result = await this.$http.get('/member/list')
@@ -299,6 +297,10 @@ export default {
     },
     handleSearch() {
       console.log(this.form)
+    },
+    // ---------------------------------------- 会员编辑/录入会员 ----------------------------------------
+    handleJumpDetails(item) {
+      this.$router.push({ path: '/details' })
     },
     // ---------------------------------------- 会员编辑/录入会员 ----------------------------------------
     // 显示弹窗
@@ -340,7 +342,8 @@ export default {
     // 显示销卡弹窗
     handleShowSwiping(item) {
       this.cardVisible = true
-      this.cardForm = Object.assign({}, this.cardForm, item)
+      this.cardForm._id = item._id
+      this.cardForm.discount = item.discount
     },
     // 确认
     handleCardConfirm() {
@@ -351,7 +354,6 @@ export default {
         this.cardVisible = false
         this.getTableList()
       })
-      console.log('card', this.cardForm)
     },
     // 取消
     handleCardCancel() {

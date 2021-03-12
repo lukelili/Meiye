@@ -20,6 +20,7 @@ instance.interceptors.response.use(option => {
   // 状态码200 代表服务端已响应
   if (status === 200) {
     const { code } = data
+    // 与后端协商的业务code码
     if (code !== 200) {
       message.warning(data.message)
       return
@@ -39,5 +40,4 @@ instance.interceptors.response.use(option => {
   // 响应失败
   console.log('响应失败', error)
 })
-
 export default instance

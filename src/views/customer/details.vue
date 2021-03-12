@@ -7,7 +7,7 @@
           <span slot="create_time" slot-scope="{ create_time }">
             {{ $dateformat(create_time, 'isoDate') }}
           </span>
-          <span slot="orig" slot-scope="orig" style="color: orange">
+          <span slot="orig" slot-scope="orig" style="color: #ccc">
             {{ orig | decimal2 }}
           </span>
           <span slot="sale" slot-scope="sale" style="color:red">
@@ -39,11 +39,11 @@ export default {
   data() {
     return {
       columns: [
+        { title: '项目', dataIndex: 'product' },
+        { title: '服务技师', dataIndex: 'staff' },
         { title: '原价', dataIndex: 'orig', scopedSlots: { customRender: 'orig' }},
         { title: '折后', dataIndex: 'sale', scopedSlots: { customRender: 'sale' }},
         { title: '余额', dataIndex: 'balance', scopedSlots: { customRender: 'balance' }},
-        { title: '项目', dataIndex: 'product' },
-        { title: '服务技师', dataIndex: 'staff' },
         { title: '日期', scopedSlots: { customRender: 'create_time' }},
         { title: '备注', dataIndex: 'remarks' }
       ],

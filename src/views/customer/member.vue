@@ -21,7 +21,8 @@
       <div class="table-operation">
         <a-button type="primary" @click="handleShowDialog()">录入会员</a-button>
       </div>
-      <a-table bordered :columns="columns" :data-source="data" row-key="_id">
+      <vTable :table-option="tableOption" />
+      <!-- <a-table bordered :columns="columns" :data-source="data" row-key="_id">
         <span slot="gender" slot-scope="{ gender }">
           {{ gender === 'woman' ? '女' : '男' }}
         </span>
@@ -54,7 +55,7 @@
           <a-divider type="vertical" />
           <a @click="handleShowDialog(item)">编辑</a>
         </span>
-      </a-table>
+      </a-table> -->
     </div>
     <!-- 销卡 -->
     <a-modal title="销卡" :visible="cardVisible" :confirm-loading="cardLoading" @ok="handleCardConfirm" @cancel="handleCardCancel">
@@ -151,7 +152,9 @@
 </template>
 <script>
 import filters from '@/mixins/filter'
+import vTable from '@c/vTable'
 export default {
+  components: { vTable },
   mixins: [filters],
   data() {
     return {
@@ -162,61 +165,67 @@ export default {
         cardId: ''
       },
       // 表格
-      columns: [
-        {
-          title: '卡号',
-          dataIndex: 'cardId'
-        },
-        {
-          title: '姓名',
-          dataIndex: 'name'
-        },
-        {
-          title: '性别',
-          scopedSlots: { customRender: 'gender' }
-        },
-        {
-          title: '生日',
-          dataIndex: 'birthday'
-        },
-        {
-          title: '手机号',
-          dataIndex: 'phone'
-        },
-        {
-          title: '折扣',
-          scopedSlots: { customRender: 'distcount' }
-        },
-        {
-          title: '最后消费',
-          dataIndex: 'lastConsume'
-        },
-        {
-          title: '账户余额',
-          scopedSlots: { customRender: 'payment' }
-        },
-        {
-          title: '套卡',
-          scopedSlots: { customRender: 'planing' }
-        },
-        {
-          title: '标签',
-          scopedSlots: { customRender: 'labels' }
-        },
-        {
-          title: '备注',
-          dataIndex: 'remark'
-        },
-        {
-          title: '入会时间',
-          scopedSlots: { customRender: 'create_time' }
-        },
-        {
-          title: '操作',
-          scopedSlots: { customRender: 'operation' }
-        }
-      ],
-      data: [],
+      tableOption: {
+        columns: [
+          {
+            title: '卡号',
+            dataIndex: 'cardId'
+          },
+          {
+            title: '姓名',
+            dataIndex: 'name'
+          },
+          {
+            title: '性别',
+            scopedSlots: { customRender: 'gender' }
+          },
+          {
+            title: '生日',
+            dataIndex: 'birthday'
+          },
+          {
+            title: '手机号',
+            dataIndex: 'phone'
+          },
+          {
+            title: '折扣',
+            scopedSlots: { customRender: 'distcount' }
+          },
+          {
+            title: '最后消费',
+            dataIndex: 'lastConsume'
+          },
+          {
+            title: '账户余额',
+            scopedSlots: { customRender: 'payment' }
+          },
+          {
+            title: '套卡',
+            scopedSlots: { customRender: 'planing' }
+          },
+          {
+            title: '标签',
+            scopedSlots: { customRender: 'tag' },
+            slots: {
+              color: 'blue'
+            }
+          },
+          {
+            title: '备注',
+            dataIndex: 'remark'
+          },
+          {
+            title: '入会时间',
+            scopedSlots: { customRender: 'create_time' }
+          },
+          {
+            title: '操作',
+            scopedSlots: { customRender: 'operation' }
+          }
+        ],
+        data: [],
+        loading: false
+      },
       // 弹窗
       isEdit: 1,
       visible: false,
@@ -294,11 +303,14 @@ export default {
       console.log(result)
     },
     async getTableList() {
+      const tableOption = this.tableOption
+      tableOption.loading = true
       const result = await this.$http.get('/member/list')
-      this.data = result.data.data
+      tableOption.loading = false
+      tableOption.data = result.data.data
     },
     handleSearch() {
-      console.log(this.form)
+      console.log(this.getTableList())
     },
     handleJumpDetails(item) {
       this.$router.push({ path: `/details/${item._id}` })

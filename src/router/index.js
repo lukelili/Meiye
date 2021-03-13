@@ -31,19 +31,20 @@ const routes = [
     component: Layout,
     children: [
       {
-        path: '/member',
-        name: '会员详情列表',
-        redirect: '/member',
+        path: '/index',
+        name: '会员列表',
+        redirect: '/list',
         component: () => import('@/views/customer/index'),
         children: [
           {
-            path: '/member',
-            name: '会员列表',
+            path: '/list',
+            name: '会员',
             component: () => import('@/views/customer/member')
           },
           {
-            path: '/details',
+            path: '/details/:id',
             name: '会员详情',
+            props: true,
             component: () => import('@/views/customer/details')
           }
         ]

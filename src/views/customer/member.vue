@@ -21,7 +21,8 @@
       <div class="table-operation">
         <a-button type="primary" @click="handleShowDialog()">录入会员</a-button>
       </div>
-      <a-table bordered :columns="columns" :data-source="data" row-key="_id">
+      <vTable :table-option="tableOption" />
+      <!-- <a-table bordered :columns="columns" :data-source="data" row-key="_id">
         <span slot="gender" slot-scope="{ gender }">
           {{ gender === 'woman' ? '女' : '男' }}
         </span>
@@ -54,23 +55,23 @@
           <a-divider type="vertical" />
           <a @click="handleShowDialog(item)">编辑</a>
         </span>
-      </a-table>
+      </a-table> -->
     </div>
     <!-- 销卡 -->
     <a-modal title="销卡" :visible="cardVisible" :confirm-loading="cardLoading" @ok="handleCardConfirm" @cancel="handleCardCancel">
       <a-form-model ref="modelForm" layout="horizontal" hide-required-mark :model="cardForm" :rules="cardRulesForm" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-model-item label="会员折扣" prop="price">
+        <a-form-model-item label="会员折扣" prop="discount">
           {{ cardForm.discount.discount }} 折
         </a-form-model-item>
-        <a-form-model-item label="消费金额" prop="price">
-          <a-input v-model="cardForm.price" placeholder="填写消费金额" :suffix="`折后金额：${ cardForm.lastConsume ? cardForm.lastConsume: '0.00' }`" />
+        <a-form-model-item label="消费金额" prop="orig">
+          <a-input v-model="cardForm.orig" placeholder="填写消费金额" :suffix="`折后金额：${ cardForm.sale }`" />
         </a-form-model-item>
         <a-form-model-item label="消费项目" prop="product">
           <a-input v-model="cardForm.product" placeholder="填写消费项目" />
         </a-form-model-item>
-        <a-form-model-item label="服务技师" prop="person">
-          <a-select v-model="cardForm.person" option-label-prop="label" placeholder="选择服务技师">
-            <a-select-option v-for="item in staffs" :key="item.name" :value="item._id" :label="item.name">
+        <a-form-model-item label="服务技师" prop="staff">
+          <a-select v-model="cardForm.staff" option-label-prop="label" placeholder="选择服务技师">
+            <a-select-option v-for="item in staffs" :key="item._id" :value="item.name" :label="item.name">
               <div class="select-item">
                 <span class="discount">{{ item.name }}</span>
                 <span class="price">{{ item.level }}技师</span>
@@ -151,7 +152,9 @@
 </template>
 <script>
 import filters from '@/mixins/filter'
+import vTable from '@c/vTable'
 export default {
+  components: { vTable },
   mixins: [filters],
   data() {
     return {
@@ -162,61 +165,67 @@ export default {
         cardId: ''
       },
       // 表格
-      columns: [
-        {
-          title: '卡号',
-          dataIndex: 'cardId'
-        },
-        {
-          title: '姓名',
-          dataIndex: 'name'
-        },
-        {
-          title: '性别',
-          scopedSlots: { customRender: 'gender' }
-        },
-        {
-          title: '生日',
-          dataIndex: 'birthday'
-        },
-        {
-          title: '手机号',
-          dataIndex: 'phone'
-        },
-        {
-          title: '折扣',
-          scopedSlots: { customRender: 'distcount' }
-        },
-        {
-          title: '最后消费',
-          dataIndex: 'lastConsume'
-        },
-        {
-          title: '账户余额',
-          scopedSlots: { customRender: 'payment' }
-        },
-        {
-          title: '套卡',
-          scopedSlots: { customRender: 'planing' }
-        },
-        {
-          title: '标签',
-          scopedSlots: { customRender: 'labels' }
-        },
-        {
-          title: '备注',
-          dataIndex: 'remark'
-        },
-        {
-          title: '入会时间',
-          scopedSlots: { customRender: 'create_time' }
-        },
-        {
-          title: '操作',
-          scopedSlots: { customRender: 'operation' }
-        }
-      ],
-      data: [],
+      tableOption: {
+        columns: [
+          {
+            title: '卡号',
+            dataIndex: 'cardId'
+          },
+          {
+            title: '姓名',
+            dataIndex: 'name'
+          },
+          {
+            title: '性别',
+            scopedSlots: { customRender: 'gender' }
+          },
+          {
+            title: '生日',
+            dataIndex: 'birthday'
+          },
+          {
+            title: '手机号',
+            dataIndex: 'phone'
+          },
+          {
+            title: '折扣',
+            scopedSlots: { customRender: 'distcount' }
+          },
+          {
+            title: '最后消费',
+            dataIndex: 'lastConsume'
+          },
+          {
+            title: '账户余额',
+            scopedSlots: { customRender: 'payment' }
+          },
+          {
+            title: '套卡',
+            scopedSlots: { customRender: 'planing' }
+          },
+          {
+            title: '标签',
+            scopedSlots: { customRender: 'tag' },
+            slots: {
+              color: 'blue'
+            }
+          },
+          {
+            title: '备注',
+            dataIndex: 'remark'
+          },
+          {
+            title: '入会时间',
+            scopedSlots: { customRender: 'create_time' }
+          },
+          {
+            title: '操作',
+            scopedSlots: { customRender: 'operation' }
+          }
+        ],
+        data: [],
+        loading: false
+      },
       // 弹窗
       isEdit: 1,
       visible: false,
@@ -247,19 +256,20 @@ export default {
       cardVisible: false,
       cardLoading: false,
       cardForm: {
+        memberId: '',
         discount: '',
-        price: '',
-        lastConsume: '',
+        orig: '',
+        sale: '',
         product: '',
-        person: undefined,
+        staff: undefined,
         remarks: ''
       },
       cardRulesForm: {}
     }
   },
   watch: {
-    'cardForm.price'(num) {
-      this.cardForm.lastConsume = (num * this.cardForm.discount.discount).toFixed(2)
+    'cardForm.orig'(num) {
+      this.cardForm.sale = (num * this.cardForm.discount.discount / 10).toFixed(2)
     }
   },
   mounted() {
@@ -292,15 +302,17 @@ export default {
       this.staffs = result.data.data
     },
     async getTableList() {
+      const tableOption = this.tableOption
+      tableOption.loading = true
       const result = await this.$http.get('/member/list')
-      this.data = result.data.data
+      tableOption.loading = false
+      tableOption.data = result.data.data
     },
     handleSearch() {
-      console.log(this.form)
+      console.log(this.getTableList())
     },
-    // ---------------------------------------- 会员编辑/录入会员 ----------------------------------------
     handleJumpDetails(item) {
-      this.$router.push({ path: '/details' })
+      this.$router.push({ path: `/details/${item._id}` })
     },
     // ---------------------------------------- 会员编辑/录入会员 ----------------------------------------
     // 显示弹窗
@@ -342,7 +354,7 @@ export default {
     // 显示销卡弹窗
     handleShowSwiping(item) {
       this.cardVisible = true
-      this.cardForm._id = item._id
+      this.cardForm.memberId = item._id
       this.cardForm.discount = item.discount
     },
     // 确认
@@ -364,13 +376,9 @@ export default {
 </script>
 <style lang="less" scoped>
 .search{
-  padding: 10px;
   margin-bottom: 1px;
-  background-color: #fff;
 }
 .my-table{
-  padding: 10px;
-  background-color: #fff;
   .table-operation{
     text-align: right;
     margin-bottom: 10px;

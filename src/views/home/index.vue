@@ -1,3 +1,12 @@
 <template>
-  <div>首页</div>
+  <div id="home">{{ name }}</div>
 </template>
+<script>
+export default {
+  data() {
+    return {
+      name: ''
+    }
+  }
+}
+</script>

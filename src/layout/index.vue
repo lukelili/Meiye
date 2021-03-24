@@ -19,6 +19,14 @@
       <a-layout-header class="header">
         <div class="left">
           <a-icon class="trigger" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="() => (collapsed = !collapsed)" />
+          <a-breadcrumb>
+            <template v-for="(item, index) in currentRoute">
+              <a-breadcrumb-item :key="item.path">
+                <router-link v-if="index != 0" :to="{ path: item.path === '' ? '/' : item.path }">{{ item.name }}</router-link>
+                <span v-else>{{ item.name }}</span>
+              </a-breadcrumb-item>
+            </template>
+          </a-breadcrumb>
         </div>
         <div class="right">
           <div class="user" />
@@ -39,8 +47,11 @@ export default {
       currentRoute: this.$route.matched
     }
   },
-  mounted() {
-    console.log()
+  watch: {
+    '$route'(route) {
+      console.log(route.matched)
+      this.currentRoute = route.matched
+    }
   },
   methods: {
     handleMenuItem(item) {
@@ -87,11 +98,12 @@ export default {
       border-left: 1px solid #f0f2f5;
       background-color: #fff;
       .left{
+        display: flex;
+        align-items: center;
         font-size: 0;
         .trigger {
           font-size: 18px;
-          line-height: 50px;
-          padding: 0 16px;
+          padding: 16px 16px;
           cursor: pointer;
           transition: color 0.3s;
           &:hover{

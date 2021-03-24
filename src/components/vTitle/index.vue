@@ -5,6 +5,7 @@
 </template>
 <script>
 export default {
+  name: 'Vtitle',
   props: {
     title: {
       type: String,

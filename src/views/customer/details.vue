@@ -1,22 +1,9 @@
 <template>
   <div class="container">
-    <title-line title="基本信息" />
+    <v-title title="基本信息" />
     <a-tabs>
       <a-tab-pane key="1" tab="消费记录">
-        <a-table bordered :columns="columns" :data-source="data" row-key="_id">
-          <span slot="create_time" slot-scope="{ create_time }">
-            {{ $dateformat(create_time, 'isoDate') }}
-          </span>
-          <span slot="orig" slot-scope="orig" style="color: #ccc">
-            {{ orig | decimal2 }}
-          </span>
-          <span slot="sale" slot-scope="sale" style="color:red">
-            -{{ sale | decimal2 }}
-          </span>
-          <span slot="balance" slot-scope="balance" style="color: green">
-            {{ balance | decimal2 }}
-          </span>
-        </a-table>
+        <vTavle :table-option="tableOption" />
       </a-tab-pane>
       <a-tab-pane key="2" tab="修改记录">
         Content of tab 2
@@ -25,11 +12,10 @@
   </div>
 </template>
 <script>
-import titleLine from '@c/titleLine/'
-import filters from '@/mixins/filter'
+import vTavle from '@c/vTable'
+import vTitle from '@c/vTitle/'
 export default {
-  components: { titleLine },
-  mixins: [filters],
+  components: { vTitle, vTavle },
   props: {
     id: {
       type: String,
@@ -38,16 +24,18 @@ export default {
   },
   data() {
     return {
-      columns: [
-        { title: '项目', dataIndex: 'product' },
-        { title: '服务技师', dataIndex: 'staff' },
-        { title: '原价', dataIndex: 'orig', scopedSlots: { customRender: 'orig' }},
-        { title: '折后', dataIndex: 'sale', scopedSlots: { customRender: 'sale' }},
-        { title: '余额', dataIndex: 'balance', scopedSlots: { customRender: 'balance' }},
-        { title: '日期', scopedSlots: { customRender: 'create_time' }},
-        { title: '备注', dataIndex: 'remarks' }
-      ],
-      data: []
+      tableOption: {
+        columns: [
+          { title: '项目', dataIndex: 'product' },
+          { title: '服务技师', dataIndex: 'staff' },
+          { title: '原价', dataIndex: 'orig', columnType: 'slot', slotName: 'price', color: '#666' },
+          { title: '实际消费', dataIndex: 'sale', columnType: 'slot', slotName: 'price', color: 'red', before: '-' },
+          { title: '余额', dataIndex: 'balance', columnType: 'slot', slotName: 'price', color: '#07c160' },
+          { title: '日期', columnType: 'slot', slotName: '_date' },
+          { title: '备注', dataIndex: 'remarks' }
+        ],
+        data: []
+      }
     }
   },
   mounted() {
@@ -56,7 +44,7 @@ export default {
   methods: {
     async getLabels() {
       const result = await this.$http.get(`/member/list?_id=${this.id}`)
-      this.data = result.data.data[0].records
+      this.tableOption.data = result.data.data[0].records
       console.log(result)
     }
   }

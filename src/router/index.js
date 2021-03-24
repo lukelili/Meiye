@@ -34,12 +34,12 @@ const routes = [
         path: '/index',
         name: '会员列表',
         redirect: '/list',
-        component: () => import('@/views/customer/index'),
+        component: () => import('@/views/customer/member'),
         children: [
           {
             path: '/list',
-            name: '会员',
-            component: () => import('@/views/customer/member')
+            name: '会员列表',
+            component: () => import('@/views/customer/index')
           },
           {
             path: '/details/:id',

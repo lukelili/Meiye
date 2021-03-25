@@ -8,9 +8,11 @@ import '@/styles/index.css'
 import dateformat from 'dateformat'
 import qs from 'qs'
 import request from '@/utils/request'
+import echarts from 'echarts'
 
 Vue.prototype.$dateformat = dateformat
 Vue.prototype.$http = request
+Vue.prototype.$echarts = echarts
 Vue.prototype.$qs = qs
 Vue.use(Antd)
 

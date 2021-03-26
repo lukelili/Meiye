@@ -1,9 +1,9 @@
 <template>
   <a-layout class="layout">
     <!-- aside -->
-    <a-layout-sider v-model="collapsed" theme="light" class="aside" :trigger="null" collapsible>
+    <a-layout-sider v-model="collapsed" :theme="dark" class="aside" :trigger="null" collapsible>
       <div class="logo">纤指妆容会所</div>
-      <a-menu mode="inline" class="menu" :default-selected-keys="[`${currentRoute[1].path}`]" :default-open-keys="[`${currentRoute[0].path}`]" @click="handleMenuItem">
+      <a-menu mode="inline" class="menu" :theme="dark" :default-selected-keys="[`${currentRoute[1].path}`]" :default-open-keys="[`${currentRoute[0].path}`]" @click="handleMenuItem">
         <a-sub-menu v-for="route in routes" :key="route.path">
           <span slot="title"><a-icon :type="route.icon" /><span>{{ route.name }}</span></span>
           <template v-if="route.children && route.children.length">
@@ -15,8 +15,8 @@
       </a-menu>
     </a-layout-sider>
     <!-- main -->
-    <a-layout class="main">
-      <a-layout-header class="header">
+    <a-layout class="main" :theme="dark">
+      <a-layout-header class="header" :theme="dark">
         <div class="left">
           <a-icon class="trigger" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="() => (collapsed = !collapsed)" />
           <a-breadcrumb>
@@ -32,6 +32,9 @@
           <div class="user" />
         </div>
       </a-layout-header>
+      <div class="line-nav">
+        <div class="nav-item">首页</div>
+      </div>
       <a-layout-content class="content">
         <router-view />
       </a-layout-content>
@@ -39,6 +42,7 @@
   </a-layout>
 </template>
 <script>
+import { mapState } from 'vuex'
 export default {
   data() {
     return {
@@ -47,11 +51,19 @@ export default {
       currentRoute: this.$route.matched
     }
   },
+  computed: {
+    ...mapState({
+      dark: state => state.settings.dark
+    })
+  },
   watch: {
     '$route'(route) {
       console.log(route.matched)
       this.currentRoute = route.matched
     }
+  },
+  mounted() {
+    console.log(this.dark)
   },
   methods: {
     handleMenuItem(item) {
@@ -95,8 +107,10 @@ export default {
       display: flex;
       justify-content: space-between;
       padding-left: 0;
-      border-left: 1px solid #f0f2f5;
-      background-color: #fff;
+      // border-left: 1px solid #f0f2f5;
+      // background-color: #fff;
+      // border-bottom: 1px solid #eee;
+      box-shadow: 0 1px 4px rgba(255, 255, 255, .5);
       .left{
         display: flex;
         align-items: center;
@@ -110,6 +124,16 @@ export default {
             color: #1890ff;
           }
         }
+      }
+    }
+    .line-nav{
+      height: 40px;
+      padding: 4px;
+      display: flex;
+      background-color: #fff;
+      .nav-item{
+        padding: 4px 10px;
+        border: 1px solid #ccc;
       }
     }
     .content{

@@ -2,9 +2,19 @@
   margin: 10px;
   padding: 10px;
   text-align: left;
+  border-radius: 6px;
   background-color: #fff;
 }
 
 .mr-16{
   margin-right: 16px;
+}
+
+#app{
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  font-size: 14px;
+  color: #2c3e50;
 }

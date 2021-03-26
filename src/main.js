@@ -8,7 +8,8 @@ import '@/styles/index.css'
 import dateformat from 'dateformat'
 import qs from 'qs'
 import request from '@/utils/request'
-import echarts from 'echarts'
+import * as echarts from 'echarts'
+import '@/assets/reset.css'
 
 Vue.prototype.$dateformat = dateformat
 Vue.prototype.$http = request

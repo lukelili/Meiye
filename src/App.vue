@@ -11,7 +11,7 @@
         <ul class="settings-list">
           <li>
             <span>夜间模式</span>
-            <a-switch v-model="dark" checked-children="开" un-checked-children="关" @change="changeDark" />
+            <a-switch v-model="isDark" checked-children="开" un-checked-children="关" @change="changeDark" />
           </li>
         </ul>
         <div slot="handle" class="button" @click="handleShowDrawer">
@@ -23,12 +23,14 @@
 </template>
 <script>
 import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage'
 import zh_CN from 'ant-design-vue/lib/locale-provider/zh_CN'
 export default {
   data() {
     return {
       zh_CN,
-      visible: true
+      visible: false,
+      isDark: getItem('dark') === 'dark'
     }
   },
   computed: {
@@ -41,8 +43,8 @@ export default {
       this.visible = !this.visible
     },
     changeDark(val) {
-      console.log(val)
-      // this.$store.commit('SET_STATE', { key: 'dark', value:  })
+      const isDark = val ? 'dark' : 'light'
+      this.$store.commit('settings/SET_STATE', { key: 'dark', value: isDark })
     }
   }
 }

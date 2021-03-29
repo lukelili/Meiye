@@ -38,7 +38,7 @@ const routes = [
         children: [
           {
             path: '/list',
-            name: '会员列表',
+            name: '会员列表1',
             component: () => import('@/views/customer/index')
           },
           {

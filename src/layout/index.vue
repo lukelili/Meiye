@@ -15,8 +15,8 @@
       </a-menu>
     </a-layout-sider>
     <!-- main -->
-    <a-layout class="main" :theme="dark">
-      <a-layout-header class="header" :theme="dark">
+    <a-layout class="main">
+      <a-layout-header class="header">
         <div class="left">
           <a-icon class="trigger" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="() => (collapsed = !collapsed)" />
           <a-breadcrumb>
@@ -107,10 +107,8 @@ export default {
       display: flex;
       justify-content: space-between;
       padding-left: 0;
-      // border-left: 1px solid #f0f2f5;
-      // background-color: #fff;
-      // border-bottom: 1px solid #eee;
-      box-shadow: 0 1px 4px rgba(255, 255, 255, .5);
+      background-color: #fff;
+      border-bottom: 1px solid #eee;
       .left{
         display: flex;
         align-items: center;
@@ -132,8 +130,10 @@ export default {
       display: flex;
       background-color: #fff;
       .nav-item{
+        display: flex;
+        align-items: center;
         padding: 4px 10px;
-        border: 1px solid #ccc;
+        border: 1px solid #eee;
       }
     }
     .content{
